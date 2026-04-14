@@ -12,7 +12,7 @@ body {
 
 /* Navbar */
 nav {
-    background: white;
+    background: rgb(243, 240, 240);
     padding: 1rem 2rem;
     display: flex;
     justify-content: space-between;
@@ -49,6 +49,7 @@ nav {
 .cart-icon {
     cursor: pointer;
     font-size: 1.5rem;
+    color: #d946a6;
     position: relative;
     display: flex;
     align-items: center;
