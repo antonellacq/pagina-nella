@@ -16,7 +16,9 @@
             <li><a href="#productos">Productos</a></li>
             <li><a href="#contacto">Contacto</a></li>
         </ul>
-        <div class="cart-icon">🛒</div>
+        <div class="cart-icon" onclick="openCart()">
+            🛒 <span class="cart-count" id="cartCount">0</span>
+        </div>
     </nav>
 
     <!-- Hero Section -->
@@ -34,22 +36,113 @@
 
     <!-- Footer -->
     <footer id="contacto">
+        <h3>Contáctanos</h3>
+        <p>Email: info@brushglow.com | Tel: +56 9 1234 5678</p>
         <p>&copy; 2024 Blush & Glow. Todos los derechos reservados.</p>
         <p>Síguenos en <a href="#">Instagram</a> | <a href="#">Facebook</a></p>
     </footer>
 
+    <!-- Modal del Carrito -->
+    <div id="cartModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeCart()">&times;</span>
+            <h2>Mi Carrito</h2>
+            <div id="cartItems" class="cart-items"></div>
+            <div class="cart-summary">
+                <p>Subtotal: $<span id="subtotal">0</span></p>
+                <p>Envío: $<span id="shipping">0</span></p>
+                <hr>
+                <p class="total">Total: $<span id="total">0</span></p>
+            </div>
+            <button class="btn btn-checkout" onclick="goToPayment()">Ir a Pago</button>
+            <button class="btn btn-secondary" onclick="closeCart()">Continuar Comprando</button>
+        </div>
+    </div>
+
+    <!-- Modal de Pago -->
+    <div id="paymentModal" class="modal">
+        <div class="modal-content payment-form">
+            <span class="close" onclick="closePayment()">&times;</span>
+            <h2>Información de Pago</h2>
+            
+            <form id="paymentForm" onsubmit="processPayment(event)">
+                <div class="form-section">
+                    <h3>Datos Personales</h3>
+                    <input type="text" placeholder="Nombre Completo" required>
+                    <input type="email" placeholder="Correo Electrónico" required>
+                    <input type="tel" placeholder="Teléfono" required>
+                </div>
+
+                <div class="form-section">
+                    <h3>Dirección de Envío</h3>
+                    <input type="text" placeholder="Calle y Número" required>
+                    <input type="text" placeholder="Apartamento / Suite (opcional)">
+                    <div class="form-row">
+                        <input type="text" placeholder="Ciudad" required>
+                        <input type="text" placeholder="Código Postal" required>
+                    </div>
+                    <input type="text" placeholder="País" required>
+                </div>
+
+                <div class="form-section">
+                    <h3>Método de Pago</h3>
+                    <div class="payment-methods">
+                        <label><input type="radio" name="payment" value="credit" checked> Tarjeta de Crédito</label>
+                        <label><input type="radio" name="payment" value="debit"> Tarjeta de Débito</label>
+                        <label><input type="radio" name="payment" value="transfer"> Transferencia Bancaria</label>
+                    </div>
+
+                    <div id="cardDetails">
+                        <input type="text" placeholder="Número de Tarjeta" maxlength="16" required>
+                        <div class="form-row">
+                            <input type="text" placeholder="MM/AA" maxlength="5" required>
+                            <input type="text" placeholder="CVV" maxlength="3" required>
+                        </div>
+                        <input type="text" placeholder="Titular de la Tarjeta" required>
+                    </div>
+                </div>
+
+                <div class="order-summary">
+                    <h3>Resumen del Pedido</h3>
+                    <p>Subtotal: $<span id="paymentSubtotal">0</span></p>
+                    <p>Envío: $<span id="paymentShipping">0</span></p>
+                    <p class="total">Total: $<span id="paymentTotal">0</span></p>
+                </div>
+
+                <button type="submit" class="btn btn-payment">Completar Pago</button>
+                <button type="button" class="btn btn-secondary" onclick="closePayment()">Cancelar</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmación -->
+    <div id="successModal" class="modal">
+        <div class="modal-content success-modal">
+            <div class="success-icon">✓</div>
+            <h2>¡Pedido Confirmado!</h2>
+            <p>Gracias por tu compra. Recibirás un email con los detalles del seguimiento.</p>
+            <p class="order-number">Número de Pedido: <strong id="orderNumber"></strong></p>
+            <button class="btn" onclick="completeOrder()">Aceptar</button>
+        </div>
+    </div>
+
     <script>
         const products = [
-            { name: 'Blush Rosado', price: '$12.990', emoji: '💄' },
-            { name: 'Iluminador', price: '$14.990', emoji: '✨' },
-            { name: 'Base Liquida', price: '$16.990', emoji: '💅' },
-            { name: 'Labial Matte', price: '$10.990', emoji: '💋' },
-            { name: 'Sombras Ojos', price: '$13.990', emoji: '👁️' },
-            { name: 'Delineador', price: '$9.990', emoji: '🖊️' }
+            { id: 1, name: 'Blush Rosado', price: 12990, emoji: '💄' },
+            { id: 2, name: 'Iluminador', price: 14990, emoji: '✨' },
+            { id: 3, name: 'Base Líquida', price: 16990, emoji: '💅' },
+            { id: 4, name: 'Labial Matte', price: 10990, emoji: '💋' },
+            { id: 5, name: 'Sombras Ojos', price: 13990, emoji: '👁️' },
+            { id: 6, name: 'Delineador', price: 9990, emoji: '🖊️' }
         ];
 
+        let cart = [];
+        const SHIPPING_COST = 5000;
+
+        // Renderizar productos
         function renderProducts() {
             const grid = document.getElementById('productsGrid');
+            grid.innerHTML = '';
             products.forEach(product => {
                 const card = document.createElement('div');
                 card.className = 'product-card';
@@ -57,22 +150,180 @@
                     <div class="product-image">${product.emoji}</div>
                     <div class="product-info">
                         <div class="product-name">${product.name}</div>
-                        <div class="product-price">${product.price}</div>
-                        <button onclick="addToCart('${product.name}')">Agregar al Carrito</button>
+                        <div class="product-price">$${product.price.toLocaleString()}</div>
+                        <button onclick="addToCart(${product.id})">Agregar al Carrito</button>
                     </div>
                 `;
                 grid.appendChild(card);
             });
         }
 
+        // Agregar al carrito
+        function addToCart(productId) {
+            const product = products.find(p => p.id === productId);
+            const existingItem = cart.find(item => item.id === productId);
+
+            if (existingItem) {
+                existingItem.quantity++;
+            } else {
+                cart.push({ ...product, quantity: 1 });
+            }
+
+            updateCartCount();
+            showNotification(`${product.name} agregado al carrito`);
+        }
+
+        // Eliminar del carrito
+        function removeFromCart(productId) {
+            cart = cart.filter(item => item.id !== productId);
+            updateCartCount();
+            renderCart();
+        }
+
+        // Actualizar cantidad
+        function updateQuantity(productId, quantity) {
+            const item = cart.find(p => p.id === productId);
+            if (item) {
+                item.quantity = Math.max(1, quantity);
+                renderCart();
+            }
+        }
+
+        // Actualizar contador
+        function updateCartCount() {
+            const count = cart.reduce((total, item) => total + item.quantity, 0);
+            document.getElementById('cartCount').textContent = count;
+        }
+
+        // Renderizar carrito
+        function renderCart() {
+            const cartItemsDiv = document.getElementById('cartItems');
+            
+            if (cart.length === 0) {
+                cartItemsDiv.innerHTML = '<p class="empty-cart">Tu carrito está vacío</p>';
+            } else {
+                cartItemsDiv.innerHTML = cart.map(item => `
+                    <div class="cart-item">
+                        <div class="item-details">
+                            <span class="item-emoji">${item.emoji}</span>
+                            <div>
+                                <p class="item-name">${item.name}</p>
+                                <p class="item-price">$${item.price.toLocaleString()}</p>
+                            </div>
+                        </div>
+                        <div class="item-quantity">
+                            <button onclick="updateQuantity(${item.id}, ${item.quantity - 1})">-</button>
+                            <span>${item.quantity}</span>
+                            <button onclick="updateQuantity(${item.id}, ${item.quantity + 1})">+</button>
+                        </div>
+                        <div class="item-total">
+                            $${(item.price * item.quantity).toLocaleString()}
+                        </div>
+                        <button class="btn-remove" onclick="removeFromCart(${item.id})">🗑️</button>
+                    </div>
+                `).join('');
+            }
+
+            updateCartSummary();
+        }
+
+        // Actualizar resumen
+        function updateCartSummary() {
+            const subtotal = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
+            const shipping = cart.length > 0 ? SHIPPING_COST : 0;
+            const total = subtotal + shipping;
+
+            document.getElementById('subtotal').textContent = subtotal.toLocaleString();
+            document.getElementById('shipping').textContent = shipping.toLocaleString();
+            document.getElementById('total').textContent = total.toLocaleString();
+
+            document.getElementById('paymentSubtotal').textContent = subtotal.toLocaleString();
+            document.getElementById('paymentShipping').textContent = shipping.toLocaleString();
+            document.getElementById('paymentTotal').textContent = total.toLocaleString();
+        }
+
+        // Abrir carrito
+        function openCart() {
+            renderCart();
+            document.getElementById('cartModal').style.display = 'block';
+        }
+
+        // Cerrar carrito
+        function closeCart() {
+            document.getElementById('cartModal').style.display = 'none';
+        }
+
+        // Ir a pago
+        function goToPayment() {
+            if (cart.length === 0) {
+                alert('Tu carrito está vacío');
+                return;
+            }
+            document.getElementById('cartModal').style.display = 'none';
+            document.getElementById('paymentModal').style.display = 'block';
+        }
+
+        // Cerrar modal de pago
+        function closePayment() {
+            document.getElementById('paymentModal').style.display = 'none';
+        }
+
+        // Procesar pago
+        function processPayment(event) {
+            event.preventDefault();
+            const form = event.target;
+            
+            // Validación básica
+            if (form.checkValidity() === false) {
+                alert('Por favor completa todos los campos');
+                return;
+            }
+
+            // Simular procesamiento
+            document.getElementById('paymentModal').style.display = 'none';
+            
+            // Generar número de pedido
+            const orderNumber = 'BG-' + Date.now();
+            document.getElementById('orderNumber').textContent = orderNumber;
+            
+            // Mostrar confirmación
+            document.getElementById('successModal').style.display = 'block';
+        }
+
+        // Completar pedido
+        function completeOrder() {
+            cart = [];
+            updateCartCount();
+            document.getElementById('successModal').style.display = 'none';
+            document.getElementById('paymentForm').reset();
+            alert('¡Pedido completado! Gracias por tu compra.');
+        }
+
+        // Notificación
+        function showNotification(message) {
+            const notif = document.createElement('div');
+            notif.className = 'notification';
+            notif.textContent = message;
+            document.body.appendChild(notif);
+            setTimeout(() => notif.remove(), 2000);
+        }
+
+        // Cerrar modales al hacer click fuera
+        window.onclick = function(event) {
+            const cartModal = document.getElementById('cartModal');
+            const paymentModal = document.getElementById('paymentModal');
+            const successModal = document.getElementById('successModal');
+            
+            if (event.target === cartModal) cartModal.style.display = 'none';
+            if (event.target === paymentModal) paymentModal.style.display = 'none';
+            if (event.target === successModal) successModal.style.display = 'none';
+        }
+
         function scrollToProducts() {
             document.getElementById('productos').scrollIntoView({ behavior: 'smooth' });
         }
 
-        function addToCart(productName) {
-            alert(`${productName} agregado al carrito`);
-        }
-
+        // Inicializar
         renderProducts();
     </script>
 </body>
