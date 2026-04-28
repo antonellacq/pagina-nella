@@ -5,7 +5,7 @@ param(
     [string]$mensaje = "Actualización automática"
 )
 
-$repoPath = "c:\Users\x360\Documents\pagina-nella"
+$repoPath = Split-Path -Parent $MyInvocation.MyCommand.Path
 Set-Location $repoPath
 
 try {
@@ -17,11 +17,12 @@ try {
     
     if ($status) {
         # Hacer commit solo si hay cambios
+        $branch = git branch --show-current
         $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
         git commit -m "$mensaje - $timestamp"
         
-        # Push a GitHub
-        git push origin main
+        # Push a GitHub en la rama actual
+        git push origin $branch
         
         Write-Host "✅ Cambios guardados en GitHub con éxito" -ForegroundColor Green
     } else {

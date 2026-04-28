@@ -34,6 +34,73 @@
         <div class="products-grid" id="productsGrid"></div>
     </section>
 
+    <!-- Forms Section -->
+    <section class="forms-section">
+        <h2>Formularios</h2>
+        <div class="forms-grid">
+            <div class="form-card">
+                <h3>Registro</h3>
+                <form id="registerForm">
+                    <div class="form-field">
+                        <label for="registerUsername">Usuario</label>
+                        <input type="text" id="registerUsername" placeholder="Nombre de usuario">
+                    </div>
+                    <div class="form-field">
+                        <label for="registerEmail">Email</label>
+                        <input type="email" id="registerEmail" placeholder="usuario@ejemplo.com">
+                    </div>
+                    <div class="form-field">
+                        <label for="registerPassword">Contraseña</label>
+                        <input type="password" id="registerPassword" placeholder="Mínimo 8 caracteres">
+                    </div>
+                    <div class="form-field">
+                        <label for="registerConfirm">Confirmar Contraseña</label>
+                        <input type="password" id="registerConfirm" placeholder="Repite tu contraseña">
+                    </div>
+                    <div id="registerFeedback" class="form-feedback" aria-live="polite"></div>
+                    <button type="submit" class="btn">Registrarse</button>
+                </form>
+            </div>
+
+            <div class="form-card">
+                <h3>Login</h3>
+                <form id="loginForm">
+                    <div class="form-field">
+                        <label for="loginEmail">Email</label>
+                        <input type="email" id="loginEmail" placeholder="usuario@ejemplo.com">
+                    </div>
+                    <div class="form-field">
+                        <label for="loginPassword">Contraseña</label>
+                        <input type="password" id="loginPassword" placeholder="Contraseña">
+                    </div>
+                    <div id="loginFeedback" class="form-feedback" aria-live="polite"></div>
+                    <button type="submit" class="btn">Ingresar</button>
+                </form>
+            </div>
+
+            <div class="form-card">
+                <h3>Contacto</h3>
+                <form id="contactForm">
+                    <div class="form-field">
+                        <label for="contactName">Nombre</label>
+                        <input type="text" id="contactName" placeholder="Tu nombre completo">
+                    </div>
+                    <div class="form-field">
+                        <label for="contactSubject">Asunto</label>
+                        <input type="text" id="contactSubject" placeholder="Tema del mensaje">
+                    </div>
+                    <div class="form-field">
+                        <label for="contactMessage">Mensaje</label>
+                        <textarea id="contactMessage" rows="5" placeholder="Escribe tu mensaje..." maxlength="300"></textarea>
+                        <div class="char-counter"><span id="messageCounter">0</span>/300 caracteres</div>
+                    </div>
+                    <div id="contactFeedback" class="form-feedback" aria-live="polite"></div>
+                    <button type="submit" class="btn">Enviar Mensaje</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
     <!-- Footer -->
     <footer id="contacto">
         <h3>Contáctanos</h3>
@@ -318,6 +385,103 @@
             if (event.target === paymentModal) paymentModal.style.display = 'none';
             if (event.target === successModal) successModal.style.display = 'none';
         }
+
+        function handleRegister(event) {
+            event.preventDefault();
+            const username = document.getElementById('registerUsername').value.trim();
+            const email = document.getElementById('registerEmail').value.trim();
+            const password = document.getElementById('registerPassword').value;
+            const confirmPassword = document.getElementById('registerConfirm').value;
+            const feedback = document.getElementById('registerFeedback');
+            const errors = [];
+
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+            if (!username) errors.push('El usuario es obligatorio.');
+            if (!email) {
+                errors.push('El email es obligatorio.');
+            } else if (!emailRegex.test(email)) {
+                errors.push('El formato de email no es válido.');
+            }
+            if (password.length < 8) {
+                errors.push('La contraseña debe tener al menos 8 caracteres.');
+            }
+            if (password !== confirmPassword) {
+                errors.push('Las contraseñas deben ser idénticas.');
+            }
+
+            if (errors.length > 0) {
+                feedback.innerHTML = errors.map(error => `<p class="feedback error">${error}</p>`).join('');
+                return;
+            }
+
+            feedback.innerHTML = '<p class="feedback success">Registro exitoso. ¡Bienvenida!</p>';
+            event.target.reset();
+        }
+
+        function handleLogin(event) {
+            event.preventDefault();
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value;
+            const feedback = document.getElementById('loginFeedback');
+            const errors = [];
+
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+            if (!email) {
+                errors.push('El email es obligatorio.');
+            } else if (!emailRegex.test(email)) {
+                errors.push('El email no tiene un formato válido.');
+            }
+            if (!password) {
+                errors.push('La contraseña es obligatoria.');
+            }
+
+            if (errors.length > 0) {
+                feedback.innerHTML = errors.map(error => `<p class="feedback error">${error}</p>`).join('');
+                return;
+            }
+
+            feedback.innerHTML = '<p class="feedback success">Ingreso exitoso. ¡Bienvenida de nuevo!</p>';
+            event.target.reset();
+        }
+
+        function updateMessageCounter() {
+            const textarea = document.getElementById('contactMessage');
+            const counter = document.getElementById('messageCounter');
+            const maxLength = 300;
+            if (textarea.value.length > maxLength) {
+                textarea.value = textarea.value.slice(0, maxLength);
+            }
+            counter.textContent = textarea.value.length;
+        }
+
+        function handleContact(event) {
+            event.preventDefault();
+            const name = document.getElementById('contactName').value.trim();
+            const subject = document.getElementById('contactSubject').value.trim();
+            const message = document.getElementById('contactMessage').value.trim();
+            const feedback = document.getElementById('contactFeedback');
+            const errors = [];
+
+            if (!name) errors.push('El nombre es obligatorio.');
+            if (!subject) errors.push('El asunto es obligatorio.');
+            if (!message) errors.push('El mensaje no puede quedar vacío.');
+
+            if (errors.length > 0) {
+                feedback.innerHTML = errors.map(error => `<p class="feedback error">${error}</p>`).join('');
+                return;
+            }
+
+            feedback.innerHTML = '<p class="feedback success">Mensaje enviado correctamente. Gracias por contactarnos.</p>';
+            event.target.reset();
+            updateMessageCounter();
+        }
+
+        document.getElementById('registerForm').addEventListener('submit', handleRegister);
+        document.getElementById('loginForm').addEventListener('submit', handleLogin);
+        document.getElementById('contactForm').addEventListener('submit', handleContact);
+        document.getElementById('contactMessage').addEventListener('input', updateMessageCounter);
 
         function scrollToProducts() {
             document.getElementById('productos').scrollIntoView({ behavior: 'smooth' });
