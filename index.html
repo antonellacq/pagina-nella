@@ -16,8 +16,11 @@
             <li><a href="#productos">Productos</a></li>
             <li><a href="#contacto">Contacto</a></li>
         </ul>
-        <div class="cart-icon" onclick="openCart()">
-            🛒 <span class="cart-count" id="cartCount">0</span>
+        <div class="nav-actions">
+            <button class="btn-account" onclick="openAuthModal()">Cuenta</button>
+            <div class="cart-icon" onclick="openCart()">
+                🛒 <span class="cart-count" id="cartCount">0</span>
+            </div>
         </div>
     </nav>
 
@@ -28,58 +31,81 @@
         <button class="btn" onclick="scrollToProducts()">Comprar Ahora</button>
     </section>
 
+    <!-- Auth Modal -->
+    <div id="authModal" class="modal">
+        <div class="modal-content auth-modal">
+            <span class="close" onclick="closeAuthModal()">&times;</span>
+            <div class="auth-menu">
+                <button class="auth-tab active" onclick="showAuthForm('register')">Registro</button>
+                <button class="auth-tab" onclick="showAuthForm('login')">Iniciar Sesión</button>
+            </div>
+            <div id="authForms">
+                <!-- Register Form -->
+                <div id="registerFormContainer" class="auth-form active">
+                    <h3>Registro</h3>
+                    <form id="registerForm">
+                        <div class="form-field">
+                            <label for="registerUsername">Usuario</label>
+                            <input type="text" id="registerUsername" placeholder="Nombre de usuario">
+                        </div>
+                        <div class="form-field">
+                            <label for="registerEmail">Email</label>
+                            <input type="email" id="registerEmail" placeholder="usuario@ejemplo.com">
+                        </div>
+                        <div class="form-field">
+                            <label for="registerPassword">Contraseña</label>
+                            <input type="password" id="registerPassword" placeholder="Mínimo 8 caracteres">
+                        </div>
+                        <div class="form-field">
+                            <label for="registerConfirm">Confirmar Contraseña</label>
+                            <input type="password" id="registerConfirm" placeholder="Repite tu contraseña">
+                        </div>
+                        <div id="registerFeedback" class="form-feedback" aria-live="polite"></div>
+                        <button type="submit" class="btn">Registrarse</button>
+                    </form>
+                </div>
+                <!-- Login Form -->
+                <div id="loginFormContainer" class="auth-form">
+                    <h3>Iniciar Sesión</h3>
+                    <form id="loginForm">
+                        <div class="form-field">
+                            <label for="loginEmail">Email</label>
+                            <input type="email" id="loginEmail" placeholder="usuario@ejemplo.com">
+                        </div>
+                        <div class="form-field">
+                            <label for="loginPassword">Contraseña</label>
+                            <input type="password" id="loginPassword" placeholder="Contraseña">
+                        </div>
+                        <div id="loginFeedback" class="form-feedback" aria-live="polite"></div>
+                        <button type="submit" class="btn">Ingresar</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Products Section -->
     <section class="products" id="productos">
         <h2>Nuestros Productos</h2>
         <div class="products-grid" id="productsGrid"></div>
     </section>
 
-    <!-- Forms Section -->
-    <section class="forms-section">
-        <h2>Formularios</h2>
-        <div class="forms-grid">
-            <div class="form-card">
-                <h3>Registro</h3>
-                <form id="registerForm">
-                    <div class="form-field">
-                        <label for="registerUsername">Usuario</label>
-                        <input type="text" id="registerUsername" placeholder="Nombre de usuario">
-                    </div>
-                    <div class="form-field">
-                        <label for="registerEmail">Email</label>
-                        <input type="email" id="registerEmail" placeholder="usuario@ejemplo.com">
-                    </div>
-                    <div class="form-field">
-                        <label for="registerPassword">Contraseña</label>
-                        <input type="password" id="registerPassword" placeholder="Mínimo 8 caracteres">
-                    </div>
-                    <div class="form-field">
-                        <label for="registerConfirm">Confirmar Contraseña</label>
-                        <input type="password" id="registerConfirm" placeholder="Repite tu contraseña">
-                    </div>
-                    <div id="registerFeedback" class="form-feedback" aria-live="polite"></div>
-                    <button type="submit" class="btn">Registrarse</button>
-                </form>
+    <!-- Contact Section -->
+    <section class="contact-section" id="contacto">
+        <h2>Contáctanos</h2>
+        <div class="contact-content">
+            <div class="contact-info">
+                <h3>Información de Contacto</h3>
+                <p><strong>Email:</strong> info@brushglow.com</p>
+                <p><strong>Teléfono:</strong> +56 9 1234 5678</p>
+                <p><strong>Horario:</strong> Lunes a Viernes 9:00 - 18:00</p>
+                <div class="social-links">
+                    <p>Síguenos en:</p>
+                    <a href="#">Instagram</a> | <a href="#">Facebook</a>
+                </div>
             </div>
-
-            <div class="form-card">
-                <h3>Login</h3>
-                <form id="loginForm">
-                    <div class="form-field">
-                        <label for="loginEmail">Email</label>
-                        <input type="email" id="loginEmail" placeholder="usuario@ejemplo.com">
-                    </div>
-                    <div class="form-field">
-                        <label for="loginPassword">Contraseña</label>
-                        <input type="password" id="loginPassword" placeholder="Contraseña">
-                    </div>
-                    <div id="loginFeedback" class="form-feedback" aria-live="polite"></div>
-                    <button type="submit" class="btn">Ingresar</button>
-                </form>
-            </div>
-
-            <div class="form-card">
-                <h3>Contacto</h3>
+            <div class="contact-form">
+                <h3>Envíanos un Mensaje</h3>
                 <form id="contactForm">
                     <div class="form-field">
                         <label for="contactName">Nombre</label>
@@ -102,11 +128,8 @@
     </section>
 
     <!-- Footer -->
-    <footer id="contacto">
-        <h3>Contáctanos</h3>
-        <p>Email: info@brushglow.com | Tel: +56 9 1234 5678</p>
+    <footer>
         <p>&copy; 2024 Blush & Glow. Todos los derechos reservados.</p>
-        <p>Síguenos en <a href="#">Instagram</a> | <a href="#">Facebook</a></p>
     </footer>
 
     <!-- Modal del Carrito -->
@@ -380,10 +403,31 @@
             const cartModal = document.getElementById('cartModal');
             const paymentModal = document.getElementById('paymentModal');
             const successModal = document.getElementById('successModal');
+            const authModal = document.getElementById('authModal');
             
             if (event.target === cartModal) cartModal.style.display = 'none';
             if (event.target === paymentModal) paymentModal.style.display = 'none';
             if (event.target === successModal) successModal.style.display = 'none';
+            if (event.target === authModal) authModal.style.display = 'none';
+        }
+
+        // Funciones para modal de autenticación
+        function openAuthModal() {
+            document.getElementById('authModal').style.display = 'block';
+        }
+
+        function closeAuthModal() {
+            document.getElementById('authModal').style.display = 'none';
+        }
+
+        function showAuthForm(formType) {
+            // Alternar pestañas
+            document.querySelectorAll('.auth-tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelector(`.auth-tab[onclick="showAuthForm('${formType}')"]`).classList.add('active');
+            
+            // Mostrar formulario
+            document.querySelectorAll('.auth-form').forEach(form => form.classList.remove('active'));
+            document.getElementById(`${formType}FormContainer`).classList.add('active');
         }
 
         function handleRegister(event) {
