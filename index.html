@@ -54,7 +54,22 @@
                         </div>
                         <div class="form-field">
                             <label for="registerPassword">Contraseña</label>
-                            <input type="password" id="registerPassword" placeholder="Mínimo 8 caracteres">
+                            <input type="password" id="registerPassword" placeholder="Mínimo 8 caracteres" oninput="updatePasswordRequirements()">
+                            <div id="passwordRequirements" class="password-requirements">
+                                <p class="requirements-title">Requisitos de Contraseña:</p>
+                                <div class="requirement" id="req-length">
+                                    <span class="requirement-icon">○</span>
+                                    <span class="requirement-text">Mínimo 8 caracteres</span>
+                                </div>
+                                <div class="requirement" id="req-uppercase">
+                                    <span class="requirement-icon">○</span>
+                                    <span class="requirement-text">Al menos una letra mayúscula (A-Z)</span>
+                                </div>
+                                <div class="requirement" id="req-special">
+                                    <span class="requirement-icon">○</span>
+                                    <span class="requirement-text">Al menos un carácter especial (!@#$%^&*)</span>
+                                </div>
+                            </div>
                         </div>
                         <div class="form-field">
                             <label for="registerConfirm">Confirmar Contraseña</label>
@@ -454,6 +469,44 @@
             // Mostrar formulario
             document.querySelectorAll('.auth-form').forEach(form => form.classList.remove('active'));
             document.getElementById(`${formType}FormContainer`).classList.add('active');
+        }
+
+        function updatePasswordRequirements() {
+            const password = document.getElementById('registerPassword').value;
+            
+            const hasMinLength = password.length >= 8;
+            const hasUpperCase = /[A-Z]/.test(password);
+            const hasSpecialChar = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
+            
+            // Actualizar requisito de longitud
+            const reqLength = document.getElementById('req-length');
+            if (hasMinLength) {
+                reqLength.classList.add('met');
+                reqLength.querySelector('.requirement-icon').textContent = '✓';
+            } else {
+                reqLength.classList.remove('met');
+                reqLength.querySelector('.requirement-icon').textContent = '○';
+            }
+            
+            // Actualizar requisito de mayúscula
+            const reqUppercase = document.getElementById('req-uppercase');
+            if (hasUpperCase) {
+                reqUppercase.classList.add('met');
+                reqUppercase.querySelector('.requirement-icon').textContent = '✓';
+            } else {
+                reqUppercase.classList.remove('met');
+                reqUppercase.querySelector('.requirement-icon').textContent = '○';
+            }
+            
+            // Actualizar requisito de carácter especial
+            const reqSpecial = document.getElementById('req-special');
+            if (hasSpecialChar) {
+                reqSpecial.classList.add('met');
+                reqSpecial.querySelector('.requirement-icon').textContent = '✓';
+            } else {
+                reqSpecial.classList.remove('met');
+                reqSpecial.querySelector('.requirement-icon').textContent = '○';
+            }
         }
 
         function handleRegister(event) {

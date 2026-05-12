@@ -411,6 +411,59 @@ nav {
     margin-top: 0.35rem;
 }
 
+.password-requirements {
+    background: #f9f9f9;
+    border: 1px solid #e5e5e5;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-top: 0.5rem;
+    display: none;
+}
+
+.form-field input[type="password"]:focus ~ .password-requirements,
+.form-field input[type="password"]:not(:placeholder-shown) ~ .password-requirements {
+    display: block;
+}
+
+.requirements-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #444;
+    margin-bottom: 0.7rem;
+}
+
+.requirement {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 0.5rem;
+    transition: all 0.3s;
+}
+
+.requirement-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #f0f0f0;
+    color: #999;
+    font-weight: bold;
+    font-size: 0.85rem;
+}
+
+.requirement.met {
+    color: #166534;
+}
+
+.requirement.met .requirement-icon {
+    background: #166534;
+    color: white;
+}
+
 .product-card {
     background: white;
     border-radius: 10px;
