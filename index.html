@@ -84,6 +84,32 @@
         </div>
     </div>
 
+    <!-- Carousel Section -->
+    <section class="carousel-section" id="galeria">
+        <div class="carousel-container">
+            <div class="carousel-slide fade">
+                <img src="img/premium_makeup_palette_1778612222439.png" alt="Paleta de Sombras Premium">
+                <div class="carousel-caption">Colores Vibrantes y Lujosos</div>
+            </div>
+            <div class="carousel-slide fade">
+                <img src="img/luxurious_lipsticks_1778612236329.png" alt="Colección de Labiales">
+                <div class="carousel-caption">Acabados Brillantes y Mate</div>
+            </div>
+            <div class="carousel-slide fade">
+                <img src="img/glowing_foundation_1778612251107.png" alt="Bases de Maquillaje">
+                <div class="carousel-caption">Luminosidad y Elegancia</div>
+            </div>
+
+            <a class="carousel-prev" onclick="plusSlides(-1)">&#10094;</a>
+            <a class="carousel-next" onclick="plusSlides(1)">&#10095;</a>
+        </div>
+        <div class="carousel-dots">
+            <span class="carousel-dot" onclick="currentSlide(1)"></span>
+            <span class="carousel-dot" onclick="currentSlide(2)"></span>
+            <span class="carousel-dot" onclick="currentSlide(3)"></span>
+        </div>
+    </section>
+
     <!-- Products Section -->
     <section class="products" id="productos">
         <h2>Nuestros Productos</h2>
@@ -529,6 +555,39 @@
 
         function scrollToProducts() {
             document.getElementById('productos').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Carousel Logic
+        let slideIndex = 1;
+        showSlides(slideIndex);
+
+        // Auto play carousel
+        setInterval(function() {
+            plusSlides(1);
+        }, 5000); // Change image every 5 seconds
+
+        function plusSlides(n) {
+            showSlides(slideIndex += n);
+        }
+
+        function currentSlide(n) {
+            showSlides(slideIndex = n);
+        }
+
+        function showSlides(n) {
+            let i;
+            let slides = document.getElementsByClassName("carousel-slide");
+            let dots = document.getElementsByClassName("carousel-dot");
+            if (n > slides.length) {slideIndex = 1}    
+            if (n < 1) {slideIndex = slides.length}
+            for (i = 0; i < slides.length; i++) {
+                slides[i].style.display = "none";  
+            }
+            for (i = 0; i < dots.length; i++) {
+                dots[i].className = dots[i].className.replace(" active", "");
+            }
+            slides[slideIndex-1].style.display = "block";  
+            dots[slideIndex-1].className += " active";
         }
 
         // Inicializar

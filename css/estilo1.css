@@ -173,6 +173,104 @@ nav {
     background: #ff5252;
 }
 
+/* Carousel Section */
+.carousel-section {
+    max-width: 1000px;
+    position: relative;
+    margin: 3rem auto;
+    padding: 0 1rem;
+}
+
+.carousel-container {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+}
+
+.carousel-slide {
+    display: none;
+    position: relative;
+}
+
+.carousel-slide img {
+    width: 100%;
+    height: 500px;
+    object-fit: cover;
+    display: block;
+}
+
+.carousel-caption {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(217, 70, 166, 0.8);
+    color: white;
+    padding: 1.5rem;
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.carousel-prev, .carousel-next {
+    cursor: pointer;
+    position: absolute;
+    top: 50%;
+    width: auto;
+    padding: 16px;
+    margin-top: -22px;
+    color: white;
+    font-weight: bold;
+    font-size: 24px;
+    transition: 0.6s ease;
+    border-radius: 0 3px 3px 0;
+    user-select: none;
+    background-color: rgba(0,0,0,0.3);
+}
+
+.carousel-next {
+    right: 0;
+    border-radius: 3px 0 0 3px;
+}
+
+.carousel-prev:hover, .carousel-next:hover {
+    background-color: rgba(0,0,0,0.8);
+}
+
+.carousel-dots {
+    text-align: center;
+    margin-top: 15px;
+}
+
+.carousel-dot {
+    cursor: pointer;
+    height: 15px;
+    width: 15px;
+    margin: 0 5px;
+    background-color: #bbb;
+    border-radius: 50%;
+    display: inline-block;
+    transition: background-color 0.6s ease;
+}
+
+.carousel-dot.active, .carousel-dot:hover {
+    background-color: #d946a6;
+}
+
+.fade {
+    animation-name: fade;
+    animation-duration: 1.5s;
+}
+
+@keyframes fade {
+    from {opacity: .4} 
+    to {opacity: 1}
+}
+
 /* Products Section */
 .products {
     padding: 4rem 2rem;
