@@ -465,17 +465,35 @@
             const feedback = document.getElementById('registerFeedback');
             const errors = [];
 
+            // Validación estricta de email
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            
+            // Validación de contraseña
+            const hasMinLength = password.length >= 8;
+            const hasUpperCase = /[A-Z]/.test(password);
+            const hasSpecialChar = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
 
             if (!username) errors.push('El usuario es obligatorio.');
             if (!email) {
                 errors.push('El email es obligatorio.');
             } else if (!emailRegex.test(email)) {
-                errors.push('El formato de email no es válido.');
+                errors.push('❌ El email debe tener un formato válido (ej: camila123@gmail.com).');
             }
-            if (password.length < 8) {
-                errors.push('La contraseña debe tener al menos 8 caracteres.');
+            
+            if (!password) {
+                errors.push('La contraseña es obligatoria.');
+            } else {
+                if (!hasMinLength) {
+                    errors.push('❌ La contraseña debe tener mínimo 8 caracteres.');
+                }
+                if (!hasUpperCase) {
+                    errors.push('❌ La contraseña debe contener al menos una letra mayúscula.');
+                }
+                if (!hasSpecialChar) {
+                    errors.push('❌ La contraseña debe contener al menos un carácter especial (!@#$%^&* etc).');
+                }
             }
+            
             if (password !== confirmPassword) {
                 errors.push('Las contraseñas deben ser idénticas.');
             }
@@ -485,7 +503,7 @@
                 return;
             }
 
-            feedback.innerHTML = '<p class="feedback success">Registro exitoso. ¡Bienvenida!</p>';
+            feedback.innerHTML = '<p class="feedback success">✓ Registro exitoso. ¡Bienvenida!</p>';
             event.target.reset();
         }
 
