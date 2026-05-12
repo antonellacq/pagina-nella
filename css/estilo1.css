@@ -425,6 +425,20 @@ nav {
     display: block;
 }
 
+.username-requirements {
+    background: #f9f9f9;
+    border: 1px solid #e5e5e5;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-top: 0.5rem;
+    display: none;
+}
+
+.form-field input[type="text"]:focus ~ .username-requirements,
+.form-field input[type="text"]:not(:placeholder-shown) ~ .username-requirements {
+    display: block;
+}
+
 .requirements-title {
     font-size: 0.9rem;
     font-weight: 600;

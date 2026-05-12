@@ -46,7 +46,22 @@
                     <form id="registerForm">
                         <div class="form-field">
                             <label for="registerUsername">Usuario</label>
-                            <input type="text" id="registerUsername" placeholder="Nombre de usuario">
+                            <input type="text" id="registerUsername" placeholder="Nombre de usuario" oninput="updateUsernameRequirements()">
+                            <div id="usernameRequirements" class="username-requirements">
+                                <p class="requirements-title">Requisitos de Usuario:</p>
+                                <div class="requirement" id="req-user-length">
+                                    <span class="requirement-icon">○</span>
+                                    <span class="requirement-text">5-20 caracteres</span>
+                                </div>
+                                <div class="requirement" id="req-user-start">
+                                    <span class="requirement-icon">○</span>
+                                    <span class="requirement-text">Debe empezar con una letra</span>
+                                </div>
+                                <div class="requirement" id="req-user-valid">
+                                    <span class="requirement-icon">○</span>
+                                    <span class="requirement-text">Solo letras, números, _ y -</span>
+                                </div>
+                            </div>
                         </div>
                         <div class="form-field">
                             <label for="registerEmail">Email</label>
@@ -509,6 +524,44 @@
             }
         }
 
+        function updateUsernameRequirements() {
+            const username = document.getElementById('registerUsername').value;
+            
+            const hasValidLength = username.length >= 5 && username.length <= 20;
+            const startsWithLetter = /^[a-zA-Z]/.test(username);
+            const hasValidChars = /^[a-zA-Z0-9_-]*$/.test(username);
+            
+            // Actualizar requisito de longitud
+            const reqUserLength = document.getElementById('req-user-length');
+            if (hasValidLength) {
+                reqUserLength.classList.add('met');
+                reqUserLength.querySelector('.requirement-icon').textContent = '✓';
+            } else {
+                reqUserLength.classList.remove('met');
+                reqUserLength.querySelector('.requirement-icon').textContent = '○';
+            }
+            
+            // Actualizar requisito de letra inicial
+            const reqUserStart = document.getElementById('req-user-start');
+            if (startsWithLetter) {
+                reqUserStart.classList.add('met');
+                reqUserStart.querySelector('.requirement-icon').textContent = '✓';
+            } else {
+                reqUserStart.classList.remove('met');
+                reqUserStart.querySelector('.requirement-icon').textContent = '○';
+            }
+            
+            // Actualizar requisito de caracteres válidos
+            const reqUserValid = document.getElementById('req-user-valid');
+            if (hasValidChars && username.length > 0) {
+                reqUserValid.classList.add('met');
+                reqUserValid.querySelector('.requirement-icon').textContent = '✓';
+            } else {
+                reqUserValid.classList.remove('met');
+                reqUserValid.querySelector('.requirement-icon').textContent = '○';
+            }
+        }
+
         function handleRegister(event) {
             event.preventDefault();
             const username = document.getElementById('registerUsername').value.trim();
@@ -521,12 +574,29 @@
             // Validación estricta de email
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             
+            // Validación de usuario
+            const hasValidUserLength = username.length >= 5 && username.length <= 20;
+            const userStartsWithLetter = /^[a-zA-Z]/.test(username);
+            const hasValidUserChars = /^[a-zA-Z0-9_-]*$/.test(username);
+            
             // Validación de contraseña
             const hasMinLength = password.length >= 8;
             const hasUpperCase = /[A-Z]/.test(password);
             const hasSpecialChar = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
 
-            if (!username) errors.push('El usuario es obligatorio.');
+            if (!username) {
+                errors.push('El usuario es obligatorio.');
+            } else {
+                if (!hasValidUserLength) {
+                    errors.push('❌ El usuario debe tener entre 5 y 20 caracteres.');
+                }
+                if (!userStartsWithLetter) {
+                    errors.push('❌ El usuario debe empezar con una letra.');
+                }
+                if (!hasValidUserChars) {
+                    errors.push('❌ El usuario solo puede contener letras, números, guiones (_) y guiones (-).');
+                }
+            }
             if (!email) {
                 errors.push('El email es obligatorio.');
             } else if (!emailRegex.test(email)) {
