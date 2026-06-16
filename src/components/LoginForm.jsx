@@ -14,7 +14,7 @@ const sanitizeText = (text) => {
 };
 
 export default function LoginForm({ registeredUsers, onLogin }) {
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [feedback, setFeedback] = useState([]);
   const [feedbackType, setFeedbackType] = useState(''); // 'error' or 'success'
@@ -25,14 +25,10 @@ export default function LoginForm({ registeredUsers, onLogin }) {
     setFeedbackType('');
 
     const errors = [];
-    const cleanEmail = sanitizeText(email);
+    const cleanUsername = sanitizeText(username);
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-    if (!cleanEmail) {
-      errors.push('El email es obligatorio.');
-    } else if (!emailRegex.test(cleanEmail)) {
-      errors.push('El email no tiene un formato válido.');
+    if (!cleanUsername) {
+      errors.push('El usuario es obligatorio.');
     }
 
     if (!password) {
@@ -45,13 +41,13 @@ export default function LoginForm({ registeredUsers, onLogin }) {
       return;
     }
 
-    // Verify user exists in the registered users list
+    // Verify user exists in the registered users list by username
     const foundUser = registeredUsers.find(
-      (user) => user.email.toLowerCase() === cleanEmail.toLowerCase()
+      (user) => user.username.toLowerCase() === cleanUsername.toLowerCase()
     );
 
     if (!foundUser || foundUser.password !== password) {
-      setFeedback(['Correo electrónico o contraseña incorrectos.']);
+      setFeedback(['Nombre de usuario o contraseña incorrectos.']);
       setFeedbackType('error');
       return;
     }
@@ -65,7 +61,7 @@ export default function LoginForm({ registeredUsers, onLogin }) {
     }
 
     // Reset input fields
-    setEmail('');
+    setUsername('');
     setPassword('');
   };
 
@@ -74,14 +70,14 @@ export default function LoginForm({ registeredUsers, onLogin }) {
       <h3>Iniciar Sesión</h3>
       <form onSubmit={handleSubmit} noValidate>
         <div className="form-field">
-          <label htmlFor="loginEmail">Email</label>
+          <label htmlFor="loginUsername">Usuario</label>
           <input
-            type="email"
-            id="loginEmail"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="usuario@ejemplo.com"
-            autoComplete="email"
+            type="text"
+            id="loginUsername"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            placeholder="Nombre de usuario"
+            autoComplete="username"
             required
           />
         </div>
