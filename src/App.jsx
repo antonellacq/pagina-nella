@@ -301,9 +301,12 @@ function App() {
       {/* Footer Area */}
       <footer>
         <p>&copy; 2026 Blush & Glow. Todos los derechos reservados.</p>
-        <p>
-          Desarrollado en React con estándares de desarrollo seguro.
-        </p>
+        <p>Desarrollado en React con estándares de desarrollo seguro.</p>
+        <div style={{ marginTop: '1rem', fontSize: '0.95rem', opacity: 0.9, lineHeight: '1.6' }}>
+          <p><strong>Profesor:</strong> Víctor Vásquez</p>
+          <p><strong>Alumna:</strong> Antonella catalán</p>
+          <p><strong>Sección:</strong> 2026/O TI3031/D-FB50-N3-P13-C1/D La Granja FB5</p>
+        </div>
       </footer>
 
       {/* Auth Modal (Register & Login) */}
