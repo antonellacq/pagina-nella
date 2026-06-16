@@ -174,3 +174,16 @@ agrega toda esta conversacion al archivo ia_consultas.txt
 ASISTENTE:
 Integró el log cronológico directamente en la sección Consulta C de 'ia_consultas.txt' y actualizó los commits en el repositorio de GitHub.
 ================================================================================
+
+[TURNO 10 - ACTUALIZAR PIE DE PÁGINA ACADÉMICO]
+--------------------------------------------------------------------------------
+USUARIO:
+Haz un footer que diga:
+Profesor: Víctor Vásquez
+Alumna: Antonella catalán
+Sección: 2026/O TI3031/D-FB50-N3-P13-C1/D La Granja FB5
+
+--------------------------------------------------------------------------------
+ASISTENTE:
+Reemplazó el pie de página de Blush & Glow en 'App.jsx' para incorporar el nombre del docente, estudiante y el identificador de la sección. Compiló el build e hizo el push respectivo a GitHub.
+================================================================================
