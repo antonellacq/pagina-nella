@@ -1,0 +1,50 @@
+PROMPTS Y CONSULTAS DE INTELIGENCIA ARTIFICIAL (IA)
+
+================================================================================
+Consulta A: Estructuración e Identificación de Componentes en React
+================================================================================
+
+Prompt Usado:
+--------------------------------------------------------------------------------
+"¿Cuáles son las mejores prácticas en React para estructurar y separar una página web estática de maquillaje (Blush & Glow) en componentes funcionales modernos? Explica cómo implementar un carrusel de imágenes dinámico usando hooks de estado y ciclo de vida de componentes (useState, useEffect), cómo pasar controladores de eventos (como el cambio de imagen) mediante props, y cómo mantener una estructura HTML5 semántica limpia en el retorno JSX de la aplicación."
+
+Recomendaciones de IA obtenidas:
+--------------------------------------------------------------------------------
+1. Arquitectura de Componentes Modulares:
+   - Dividir la interfaz en subcomponentes ubicados en una carpeta dedicada `src/components/` (e.g. `Carousel.jsx`, `RegisterForm.jsx`, `LoginForm.jsx`, `ContactForm.jsx`).
+   - El componente principal `App.jsx` debe actuar como orquestador, administrando el estado global (lista de usuarios registrados, estado del carrito, visibilidad de modales).
+
+2. Ciclo de Vida y Estados en el Carrusel:
+   - Utilizar `useState` para rastrear el índice de la imagen activa.
+   - Usar `useEffect` para iniciar un temporizador de cambio automático de diapositivas (`setInterval`).
+   - IMPORTANTE: Siempre retornar una función de limpieza en `useEffect` que elimine el intervalo (`clearInterval`) para evitar fugas de memoria (memory leaks) si el componente se desmonta.
+
+3. Comunicación vía Props:
+   - Pasar funciones controladoras de eventos (`handleCambioImagen`, `onRegister`, `onContactSubmit`) y datos reactivos como propiedades (props) desde el padre hacia los hijos. Evitar funciones sueltas fuera de la jerarquía de React.
+
+4. JSX Semántico:
+   - Mantener las etiquetas estándar de HTML5 (`<header>`, `<nav>`, `<main>`, `<section>`, `<footer>`) estructurando adecuadamente las secciones del sitio directamente en el renderizado de React.
+
+
+================================================================================
+Consulta B: Implementación de Prácticas de Seguridad en Formularios React
+================================================================================
+
+Prompt Usado:
+--------------------------------------------------------------------------------
+"Necesito diseñar tres formularios controlados en React (Inscripción, Inicio de Sesión y Contacto) aplicando buenas prácticas de desarrollo seguro. ¿Cómo prevengo inyecciones de código/XSS en el cliente? ¿De qué manera debo sanitizar los datos de entrada? Proporciona un ejemplo de validación estricta usando el estado de React para evitar campos vacíos, verificar formato de correos y auditar requerimientos de contraseña complejos, vinculando correctamente los labels a sus inputs correspondientes."
+
+Recomendaciones de IA obtenidas:
+--------------------------------------------------------------------------------
+1. Prevención de XSS y Inyección de Código:
+   - Por defecto, React escapa valores renderizados entre llaves `{}` para evitar XSS básico. Sin embargo, no se debe utilizar jamás `dangerouslySetInnerHTML` con datos provenientes de inputs del usuario.
+   - Sanitizar entradas: Ejecutar un recorte de espacios en blanco (`.trim()`) y un reemplazo de caracteres especiales sospechosos (`<`, `>`, `&`, `"`, `'`) por sus correspondientes entidades HTML seguras antes de procesarlos o mostrarlos en mensajes de confirmación de éxito.
+
+2. Componentes Controlados:
+   - Cada campo debe vincular su valor al estado de React (`value={state}`) y reaccionar mediante `onChange`.
+   - Utilizar el atributo `htmlFor` en las etiquetas `<label>` apuntando al `id` del `<input>` asociado para garantizar la accesibilidad y correcta asociación en el DOM.
+
+3. Validaciones con Estado de React:
+   - Validar el formato de correo electrónico mediante expresiones regulares estrictas como `/^[^\s@]+@[^\s@]+\.[^\s@]+$/`.
+   - Evaluar dinámicamente las condiciones de contraseña fuerte (longitud mínima de 8 caracteres, al menos una mayúscula y un carácter especial) a medida que el usuario escribe, proveyendo retroalimentación visual inmediata.
+   - Acumular todos los mensajes de error en un arreglo en el estado de React y renderizarlos individualmente sin inyectar HTML de forma insegura.
