@@ -187,3 +187,45 @@ Sección: 2026/O TI3031/D-FB50-N3-P13-C1/D La Granja FB5
 ASISTENTE:
 Reemplazó el pie de página de Blush & Glow en 'App.jsx' para incorporar el nombre del docente, estudiante y el identificador de la sección. Compiló el build e hizo el push respectivo a GitHub.
 ================================================================================
+
+================================================================================
+Consulta D: Principios de Seguridad e Integridad en localStorage (CRUD)
+================================================================================
+
+Prompt Usado:
+--------------------------------------------------------------------------------
+"¿Cómo puedo garantizar la integridad y seguridad de los datos al guardar registros de productos y catálogo en localStorage usando React? Dame recomendaciones para sanitizar los campos (prevención de XSS), manejar datos corruptos al cargar con useEffect, y validaciones estrictas antes de persistir."
+
+Recomendaciones de IA obtenidas:
+--------------------------------------------------------------------------------
+1. Validación en el Punto de Entrada:
+   - Validar tipos de datos y formatos antes de guardarlos. Si se espera un número (como el precio), usar `parseFloat()` y validar con `!isNaN()`.
+   - Limitar la longitud de los textos para evitar desbordamientos de almacenamiento.
+   - Prevenir la inyección de scripts HTML (XSS) mediante la sanitización de todas las cadenas ingresadas por el usuario usando una función de reemplazo de caracteres especiales.
+
+2. Carga Segura (Robustez al leer):
+   - Al recuperar datos con `useEffect`, siempre envolver `JSON.parse` en un bloque `try-catch`. Los datos en `localStorage` pueden ser modificados externamente y causar errores de sintaxis si contienen JSON inválido.
+   - Validar la estructura del objeto deserializado. Asegurar que los registros contengan los campos obligatorios antes de cargarlos en el estado del componente.
+
+3. Sincronización del Estado:
+   - Utilizar un hook de efecto (`useEffect`) para sincronizar el estado reactivo con el `localStorage` de manera automática y centralizada.
+
+================================================================================
+Consulta E: Manejo de Errores y Validaciones de Red en Fetch/Axios
+================================================================================
+
+Prompt Usado:
+--------------------------------------------------------------------------------
+"¿Cómo implementar de forma segura y robusta un fetching de datos desde una API REST (como Makeup API o similar) en React usando async/await con try-catch? Explica cómo manejar estados de carga (loading), reaccionar ante respuestas HTTP inválidas o códigos de error (4xx/5xx), controlar la desconexión del cliente, proveer un fallback local y validar los tipos de datos recibidos."
+
+Recomendaciones de IA obtenidas:
+--------------------------------------------------------------------------------
+1. Verificación del Estado de Respuesta (HTTP status code):
+   - Comprobar siempre `response.ok` antes de intentar deserializar la respuesta. Códigos de estado como 404 o 500 no lanzan excepciones automáticamente en Fetch, por lo que se debe lanzar un `Error` manualmente.
+   - Si la respuesta no es de tipo JSON o tiene una estructura diferente a la esperada, lanzar un error correspondiente.
+
+2. Manejo de Excepciones y Estados:
+   - Usar bloques `try-catch` para capturar fallos de red (conexión caída, problemas de CORS o DNS).
+   - Administrar un estado de carga (`loading = true` al inicio, `false` en `finally` o al finalizar) y un estado de error (`apiError`) para informar al usuario de forma amigable.
+   - Implementar un mecanismo de respaldo (fallback) con datos locales válidos y estables para garantizar que la aplicación siga funcionando incluso si el servicio externo no está disponible.
+

@@ -1756,3 +1756,210 @@ footer a:hover {
         text-align: center;
     }
 }
+
+/* ==========================================================================
+   Admin Inventory Panel Dashboard (CRUD)
+   ========================================================================== */
+.inventory-panel {
+    padding: 3rem 8% 5rem;
+    background: var(--bg-main);
+    min-height: 80vh;
+}
+
+.inventory-panel h2 {
+    font-size: 2.2rem;
+    margin-bottom: 0.5rem;
+    text-align: center;
+    color: var(--primary);
+}
+
+.kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.5rem;
+    margin: 2.5rem 0;
+}
+
+.kpi-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-md);
+    padding: 1.5rem;
+    box-shadow: var(--shadow-sm);
+    text-align: center;
+    transition: var(--transition);
+}
+
+.kpi-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--primary);
+}
+
+.kpi-card h3 {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.5rem;
+}
+
+.kpi-card .kpi-value {
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: var(--primary);
+    font-family: 'Playfair Display', Georgia, serif;
+}
+
+.inventory-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.inventory-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+.btn-add {
+    background: var(--primary);
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--border-radius-sm);
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.btn-add:hover {
+    background: var(--primary-hover);
+    transform: translateY(-2px);
+}
+
+.btn-reset-catalog {
+    background: transparent;
+    color: var(--text-muted);
+    border: 1px solid var(--border-color);
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--border-radius-sm);
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.btn-reset-catalog:hover {
+    background: #fdf2f4;
+    color: var(--primary);
+    border-color: var(--primary);
+}
+
+/* Responsive Table */
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-md);
+    box-shadow: var(--shadow-sm);
+}
+
+.inventory-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    min-width: 800px;
+}
+
+.inventory-table th {
+    background: #f8f6f2;
+    padding: 1.2rem 1rem;
+    font-weight: 600;
+    color: var(--text-main);
+    border-bottom: 2px solid var(--border-color);
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 0.05em;
+}
+
+.inventory-table td {
+    padding: 1.2rem 1rem;
+    border-bottom: 1px solid var(--border-color);
+    vertical-align: middle;
+}
+
+.inventory-table tr:hover {
+    background-color: #faf8f5;
+}
+
+.table-img {
+    width: 45px;
+    height: 45px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 1px solid var(--border-color);
+}
+
+.table-emoji {
+    font-size: 1.5rem;
+    width: 45px;
+    height: 45px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--primary-light);
+    border-radius: 50%;
+}
+
+.btn-edit-action {
+    background: #f6e6d8;
+    color: #a86c35;
+    border: none;
+    padding: 0.4rem 0.8rem;
+    border-radius: var(--border-radius-sm);
+    font-weight: 600;
+    cursor: pointer;
+    margin-right: 0.5rem;
+    transition: var(--transition);
+}
+
+.btn-edit-action:hover {
+    background: #e8cbb5;
+}
+
+.btn-delete-action {
+    background: #fbeef1;
+    color: #c84b31;
+    border: none;
+    padding: 0.4rem 0.8rem;
+    border-radius: var(--border-radius-sm);
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.btn-delete-action:hover {
+    background: #f9dbe1;
+}
+
+/* Product Form Modal Styles */
+.product-form-container {
+    padding: 1rem 0;
+}
+
+.product-form-container h3 {
+    font-size: 1.6rem;
+    color: var(--primary);
+    margin-bottom: 1.5rem;
+    font-family: 'Playfair Display', Georgia, serif;
+}
+
+.char-counter {
+    text-align: right;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}

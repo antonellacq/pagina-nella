@@ -13,7 +13,7 @@ const sanitizeText = (text) => {
     .replace(/\//g, '&#x2F;');
 };
 
-export default function LoginForm({ registeredUsers, onLogin }) {
+export default function LoginForm({ registeredUsers, onLogin, isAdminLogin = false }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [feedback, setFeedback] = useState([]);
@@ -46,10 +46,25 @@ export default function LoginForm({ registeredUsers, onLogin }) {
       (user) => user.username.toLowerCase() === cleanUsername.toLowerCase()
     );
 
-    if (!foundUser || foundUser.password !== password) {
-      setFeedback(['Nombre de usuario o contraseña incorrectos.']);
-      setFeedbackType('error');
-      return;
+    if (isAdminLogin) {
+      // Admin exclusive verification
+      if (!foundUser || foundUser.role !== 'admin' || foundUser.password !== password) {
+        setFeedback(['Credenciales de administrador incorrectas o no autorizadas.']);
+        setFeedbackType('error');
+        return;
+      }
+    } else {
+      // Normal user (Client) verification
+      if (foundUser && foundUser.role === 'admin') {
+        setFeedback(['Acceso denegado. Para ingresar como administrador, use la pestaña Administrador.']);
+        setFeedbackType('error');
+        return;
+      }
+      if (!foundUser || foundUser.password !== password) {
+        setFeedback(['Nombre de usuario o contraseña incorrectos.']);
+        setFeedbackType('error');
+        return;
+      }
     }
 
     // Success login
@@ -67,7 +82,7 @@ export default function LoginForm({ registeredUsers, onLogin }) {
 
   return (
     <div className="auth-form active">
-      <h3>Iniciar Sesión</h3>
+      <h3>{isAdminLogin ? 'Iniciar Sesión Administrador' : 'Iniciar Sesión Cliente'}</h3>
       <form onSubmit={handleSubmit} noValidate>
         <div className="form-field">
           <label htmlFor="loginUsername">Usuario</label>
