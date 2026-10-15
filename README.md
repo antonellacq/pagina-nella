@@ -45,23 +45,34 @@ python -m pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-## Configurar MySQL
+## Configurar XAMPP y MariaDB
 
-1. Crea una base de datos llamada `blush_glow` en MySQL.
-2. Copia `.env.example` a `.env`.
-3. Ajusta los valores reales:
+1. Inicia Apache y MySQL desde el panel de XAMPP. XAMPP distribuye MariaDB como su servidor MySQL.
+2. En phpMyAdmin crea una base de datos llamada `blush_glow` con cotejamiento `utf8mb4_unicode_ci`.
+3. Usa una cuenta dedicada para Django y dale privilegios solo sobre `blush_glow`. En la pestaña SQL de phpMyAdmin puedes ejecutar, reemplazando la contraseña:
+
+```sql
+CREATE USER 'blush_django'@'localhost' IDENTIFIED BY 'elige-una-clave-segura';
+CREATE USER 'blush_django'@'127.0.0.1' IDENTIFIED BY 'elige-una-clave-segura';
+GRANT ALL PRIVILEGES ON blush_glow.* TO 'blush_django'@'localhost';
+GRANT ALL PRIVILEGES ON blush_glow.* TO 'blush_django'@'127.0.0.1';
+FLUSH PRIVILEGES;
+```
+
+4. Comprueba la versión en phpMyAdmin con `SELECT VERSION();`. Django 5.1 requiere MariaDB 10.5 o posterior; algunas versiones de XAMPP incluyen MariaDB 10.4 y necesitan actualizar su componente de base de datos.
+5. Copia `.env.example` a `.env` y configura tus valores locales:
 
 ```env
 DEBUG=True
 SECRET_KEY=tu_clave_secreta
 DB_NAME=blush_glow
-DB_USER=root
-DB_PASSWORD=tu_password
+DB_USER=blush_django
+DB_PASSWORD=tu_clave_segura
 DB_HOST=127.0.0.1
 DB_PORT=3306
 ```
 
-En el entorno actual no se disponía de un servicio MySQL activo, por lo que la verificación se ejecutó con SQLite y la configuración quedó preparada para MySQL cuando el servicio esté disponible.
+No publiques `.env` ni uses la cuenta `root` para la aplicación. El archivo `.env` está excluido de Git.
 
 ## Ejecutar migraciones
 
@@ -101,16 +112,15 @@ Luego abre:
 
 ## Verificación funcional realizada
 
-Se comprobó que:
+Se comprobó en XAMPP/MariaDB que:
 
-- `python manage.py check` funciona sin errores.
-- `python manage.py makemigrations` genera modelos.
-- `python manage.py migrate` aplica la estructura en la base de datos.
-- La vista principal renderiza la plantilla con CSS y recursos estáticos.
-- El registro crea usuarios reales.
-- El contacto guarda mensajes reales.
-- El inventario crea productos reales para un usuario administrador.
+- `python manage.py check --database default` termina sin problemas.
+- `python manage.py migrate` aplica las migraciones de Django y `shop`.
+- La portada renderiza con el enlace al CSS original y los recursos estáticos.
+- Los formularios de registro, contacto, inventario y checkout guardan datos en la base real.
+- El CRUD de productos crea, edita y elimina registros correctamente.
+- Los registros temporales de las pruebas se eliminaron; los datos previos se conservaron.
 
 ## Estado final
 
-La aplicación queda lista para seguirse desarrollando con Django y manejar la conexión real a MySQL cuando el servicio se encuentre levantado en el entorno local o de producción.
+La aplicación queda conectada a la base `blush_glow` de XAMPP en `127.0.0.1:3306`. El diseño original se conserva en las plantillas, CSS e imágenes de `static/`.
