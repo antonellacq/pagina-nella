@@ -1,14 +1,20 @@
 from decimal import Decimal
+from decimal import InvalidOperation
+from uuid import uuid4
 
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.models import User
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
+from django.core.validators import validate_email
+from django.db import transaction
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_http_methods
 
-from .models import ContactMessage, Order, Product
+from .models import Cliente, ContactMessage, Order, Product
 
 DEFAULT_PRODUCTS = [
     {
@@ -129,6 +135,13 @@ def register_view(request):
         messages.error(request, 'Completa usuario, correo y contraseña.')
         return redirect('home')
 
+    try:
+        validate_email(email)
+        validate_password(password, user=User(username=username, email=email))
+    except ValidationError as error:
+        messages.error(request, ' '.join(error.messages))
+        return redirect('home')
+
     if User.objects.filter(username__iexact=username).exists():
         messages.error(request, 'Ese nombre de usuario ya está registrado.')
         return redirect('home')
@@ -145,7 +158,9 @@ def register_view(request):
         messages.error(request, 'La contraseña debe tener al menos 8 caracteres.')
         return redirect('home')
 
-    user = User.objects.create_user(username=username, email=email, password=password)
+    with transaction.atomic():
+        user = User.objects.create_user(username=username, email=email, password=password)
+        Cliente.objects.create(usuario=user, nombre=username[:100], correo=email)
     login(request, user)
     messages.success(request, f'Usuario {username} registrado correctamente.')
     return redirect('home')
@@ -187,6 +202,12 @@ def contact_submit(request):
         messages.error(request, 'Nombre, correo y mensaje son obligatorios.')
         return redirect('home')
 
+    try:
+        validate_email(email)
+    except ValidationError:
+        messages.error(request, 'Ingresa un correo electrónico válido.')
+        return redirect('home')
+
     ContactMessage.objects.create(name=name, email=email, phone=phone, message=message)
     messages.success(request, 'Mensaje enviado correctamente. Te contactaremos pronto.')
     return redirect('home')
@@ -209,6 +230,7 @@ def product_form(request, product_id=None):
         brand = (request.POST.get('brand') or '').strip()
         category = request.POST.get('category') or 'lipstick'
         price = request.POST.get('price') or '0'
+        stock = request.POST.get('stock') or '0'
         description = (request.POST.get('description') or '').strip()
         image_url = (request.POST.get('image_url') or '').strip()
 
@@ -216,14 +238,22 @@ def product_form(request, product_id=None):
             messages.error(request, 'Nombre, marca y descripción son obligatorios.')
             return redirect('inventory')
 
+        if category not in dict(Product.CATEGORY_CHOICES):
+            messages.error(request, 'Selecciona una categoría válida.')
+            return redirect('inventory')
+
         try:
             parsed_price = Decimal(price)
-        except Exception:
+            parsed_stock = int(stock)
+        except (InvalidOperation, ValueError):
             messages.error(request, 'El precio debe ser un valor numérico válido.')
             return redirect('inventory')
 
         if parsed_price <= 0:
             messages.error(request, 'El precio debe ser mayor a cero.')
+            return redirect('inventory')
+        if parsed_stock < 0:
+            messages.error(request, 'El stock no puede ser negativo.')
             return redirect('inventory')
 
         if product:
@@ -231,6 +261,7 @@ def product_form(request, product_id=None):
             product.brand = brand
             product.category = category
             product.price = parsed_price
+            product.stock = parsed_stock
             product.description = description
             product.image_url = image_url or product.image_url
             product.save()
@@ -241,6 +272,7 @@ def product_form(request, product_id=None):
                 brand=brand,
                 category=category,
                 price=parsed_price,
+                stock=parsed_stock,
                 description=description,
                 image_url=image_url or '/static/img/glowing_foundation_1778612251107.png',
                 rating=4.5,
@@ -280,23 +312,64 @@ def checkout_view(request):
 
     try:
         order_total = Decimal(total)
-    except Exception:
-        order_total = Decimal('0')
+    except InvalidOperation:
+        messages.error(request, 'El total del pedido no es válido.')
+        return redirect('home')
 
-    order_number = f'BG-{request.user.id if request.user.is_authenticated else "GUEST"}-{len(Order.objects.all()) + 1}'
-    Order.objects.create(
-        user=request.user if request.user.is_authenticated else None,
-        order_number=order_number,
-        full_name=name,
-        email=email,
-        phone=phone,
-        street=street,
-        city=city,
-        zip_code=zip_code,
-        country=country,
-        payment_method=payment_method,
-        total=order_total,
-    )
+    if not order_total.is_finite() or order_total <= 0:
+        messages.error(request, 'El total del pedido debe ser mayor a cero.')
+        return redirect('home')
+    if payment_method not in dict(Order.PAYMENT_METHODS):
+        messages.error(request, 'Selecciona un medio de pago válido.')
+        return redirect('home')
+    try:
+        validate_email(email)
+    except ValidationError:
+        messages.error(request, 'Ingresa un correo electrónico válido.')
+        return redirect('home')
+
+    partes_nombre = name.split(maxsplit=1)
+    nombre = partes_nombre[0][:100]
+    apellido = partes_nombre[1][:100] if len(partes_nombre) > 1 else ''
+    cliente = None
+    if request.user.is_authenticated:
+        cliente = Cliente.objects.filter(usuario=request.user).first()
+    if cliente is None:
+        cliente = Cliente.objects.filter(correo__iexact=email, usuario__isnull=True).first()
+
+    with transaction.atomic():
+        if cliente is None:
+            cliente = Cliente.objects.create(
+                usuario=request.user if request.user.is_authenticated else None,
+                nombre=nombre,
+                apellido=apellido,
+                correo=email,
+                telefono=phone[:12],
+            )
+        else:
+            cliente.nombre = nombre
+            cliente.apellido = apellido
+            cliente.correo = email
+            cliente.telefono = phone[:12]
+            if request.user.is_authenticated and cliente.usuario_id is None:
+                cliente.usuario = request.user
+            cliente.save()
+
+        order_number = f'BG-{request.user.id if request.user.is_authenticated else "GUEST"}-{uuid4().hex[:12].upper()}'
+        Order.objects.create(
+            cliente=cliente,
+            user=request.user if request.user.is_authenticated else None,
+            order_number=order_number,
+            full_name=name,
+            email=email,
+            phone=phone,
+            street=street,
+            city=city,
+            zip_code=zip_code,
+            country=country,
+            payment_method=payment_method,
+            total=order_total,
+        )
 
     messages.success(request, f'Pedido registrado con éxito. Orden {order_number}.')
     return redirect('home')

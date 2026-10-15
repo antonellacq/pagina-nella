@@ -13,7 +13,7 @@ Este proyecto conserva el diseño visual de la tienda de maquillaje original y l
 
 ## Tecnologías utilizadas
 
-- Python 3.14
+- Python 3.13
 - Django 5.1.3
 - PyMySQL para conexión MySQL
 - python-dotenv para variables de entorno
@@ -34,8 +34,8 @@ Este proyecto conserva el diseño visual de la tienda de maquillaje original y l
 En Windows PowerShell:
 
 ```powershell
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
+py -3.13 -m venv .venv313
+.\.venv313\Scripts\Activate.ps1
 ```
 
 ## Instalar dependencias
@@ -90,7 +90,7 @@ python manage.py createsuperuser
 ## Iniciar el servidor
 
 ```powershell
-python manage.py runserver 0.0.0.0:8000
+python manage.py runserver 127.0.0.1:8000
 ```
 
 Luego abre:

@@ -34,6 +34,11 @@
       </div>
 
       <div class="form-field">
+        <label for="stock">Unidades disponibles</label>
+        <input id="stock" type="number" step="1" min="0" name="stock" value="{{ product.stock|default_if_none:'0' }}" required />
+      </div>
+
+      <div class="form-field">
         <label for="image_url">URL de imagen</label>
         <input id="image_url" type="url" name="image_url" value="{{ product.image_url|default_if_none:'' }}" />
       </div>

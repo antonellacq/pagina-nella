@@ -24,6 +24,7 @@
             <th>Marca</th>
             <th>Categoría</th>
             <th>Precio</th>
+            <th>Stock</th>
             <th>Rating</th>
             <th>Acciones</th>
           </tr>
@@ -42,6 +43,7 @@
               <td>{{ product.brand }}</td>
               <td>{{ product.get_category_display }}</td>
               <td>${{ product.price }} USD</td>
+              <td>{{ product.stock }}</td>
               <td>★ {{ product.rating }}</td>
               <td>
                 <a class="btn-edit-action" href="{% url 'product_edit' product.id %}" style="text-decoration:none; margin-right: 0.5rem;">✏️ Editar</a>
@@ -53,7 +55,7 @@
             </tr>
           {% empty %}
             <tr>
-              <td colspan="7" style="text-align:center; padding:2rem;">No hay productos registrados.</td>
+              <td colspan="8" style="text-align:center; padding:2rem;">No hay productos registrados.</td>
             </tr>
           {% endfor %}
         </tbody>
