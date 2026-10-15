@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+
+{% block title %}Mi Carrito | Blush & Glow{% endblock %}
+
+{% block content %}
+  <section class="inventory-panel" style="padding: 3rem 4%;">
+    <h1>Mi Carrito</h1>
+    {% if lineas_carrito %}
+      <div class="cart-items">
+        {% for linea in lineas_carrito %}
+          <article class="cart-item">
+            <div class="item-details">
+              {% if linea.producto.image_url %}
+                <img class="item-img-thumb" src="{{ linea.producto.image_url }}" alt="{{ linea.producto.name }}" />
+              {% else %}
+                <span class="item-emoji" aria-hidden="true">&#10024;</span>
+              {% endif %}
+              <div>
+                <h2 class="item-name">{{ linea.producto.name }}</h2>
+                <p>{{ linea.producto.brand }} · {{ linea.producto.get_category_display }}</p>
+                <p class="item-price">${{ linea.producto.price }} USD · Stock: {{ linea.producto.stock }}</p>
+              </div>
+            </div>
+            <form class="item-quantity" method="post" action="{% url 'cart_update' linea.producto.id %}">
+              {% csrf_token %}
+              <label class="visually-hidden" for="cantidad-{{ linea.producto.id }}">Cantidad</label>
+              <input id="cantidad-{{ linea.producto.id }}" name="cantidad" type="number" min="1" max="{{ linea.producto.stock }}" value="{{ linea.cantidad }}" required />
+              <button type="submit" aria-label="Actualizar cantidad">Actualizar</button>
+            </form>
+            <p class="item-total">${{ linea.total }} USD</p>
+            <form method="post" action="{% url 'cart_remove' linea.producto.id %}">
+              {% csrf_token %}
+              <button class="btn-remove" type="submit" aria-label="Quitar {{ linea.producto.name }}">&#128465;</button>
+            </form>
+          </article>
+        {% endfor %}
+      </div>
+
+      <div class="cart-summary">
+        <p>Unidades: <span>{{ cantidad_carrito }}</span></p>
+        <p>Subtotal: <span>${{ subtotal_carrito }} USD</span></p>
+        <hr />
+        <p class="total">Total: <span>${{ subtotal_carrito }} USD</span></p>
+      </div>
+
+      <form class="contact-form payment-form" method="post" action="{% url 'checkout' %}">
+        {% csrf_token %}
+        <h2>Datos de entrega</h2>
+        <div class="form-field">
+          <label for="nombre-completo">Nombre completo</label>
+          <input id="nombre-completo" name="full_name" type="text" value="{% if user.is_authenticated %}{{ user.get_full_name }}{% endif %}" required />
+        </div>
+        <div class="form-field">
+          <label for="correo-pedido">Correo electrónico</label>
+          <input id="correo-pedido" name="email" type="email" value="{% if user.is_authenticated %}{{ user.email }}{% endif %}" required />
+        </div>
+        <div class="form-field">
+          <label for="telefono-pedido">Teléfono</label>
+          <input id="telefono-pedido" name="phone" type="tel" maxlength="30" required />
+        </div>
+        <div class="form-field">
+          <label for="direccion-pedido">Dirección</label>
+          <input id="direccion-pedido" name="street" type="text" maxlength="200" required />
+        </div>
+        <div class="form-row">
+          <div class="form-field">
+            <label for="ciudad-pedido">Comuna o ciudad</label>
+            <input id="ciudad-pedido" name="city" type="text" maxlength="100" required />
+          </div>
+          <div class="form-field">
+            <label for="codigo-pedido">Código postal</label>
+            <input id="codigo-pedido" name="zip_code" type="text" maxlength="20" required />
+          </div>
+        </div>
+        <div class="form-field">
+          <label for="pais-pedido">País</label>
+          <input id="pais-pedido" name="country" type="text" maxlength="100" value="Chile" required />
+        </div>
+        <div class="form-field">
+          <label for="metodo-pago">Medio de pago</label>
+          <select id="metodo-pago" name="payment_method" required>
+            {% for valor, etiqueta in metodos_pago %}
+              <option value="{{ valor }}">{{ etiqueta }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <p class="products-subtitle">El total se calcula en el servidor con los precios actuales del catálogo. No ingreses ni envíes datos de tarjeta.</p>
+        <button class="btn btn-checkout" type="submit">Confirmar pedido</button>
+        <a class="btn btn-secondary" href="{% url 'home' %}#productos" style="text-decoration:none;">Seguir comprando</a>
+      </form>
+    {% else %}
+      <p class="empty-cart">Tu carrito está vacío.</p>
+      <a class="btn" href="{% url 'home' %}#productos" style="text-decoration:none;">Ver productos</a>
+    {% endif %}
+  </section>
+{% endblock %}

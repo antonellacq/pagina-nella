@@ -105,6 +105,9 @@ Luego abre:
 - `/login/` - inicio de sesión
 - `/logout/` - cierre de sesión
 - `/contact/` - envío de mensajes
+- `/cart/` - carrito guardado en la sesión de Django
+- `/cart/add/<id>/`, `/cart/update/<id>/`, `/cart/remove/<id>/` - operaciones del carrito
+- `/checkout/` - confirma un pedido, guarda sus líneas y descuenta stock en una transacción
 - `/inventory/` - CRUD del inventario (solo admin)
 - `/products/new/` - crear producto
 - `/products/<id>/edit/` - editar producto
@@ -118,6 +121,8 @@ Se comprobó en XAMPP/MariaDB que:
 - `python manage.py migrate` aplica las migraciones de Django y `shop`.
 - La portada renderiza con el enlace al CSS original y los recursos estáticos.
 - Los formularios de registro, contacto, inventario y checkout guardan datos en la base real.
+- El carrito mantiene cantidades en una sesión respaldada por la tabla `django_session`; el servidor calcula el total usando precios vigentes y crea `OrderItem` al confirmar.
+- El checkout valida el stock actual y descuenta existencias atómicamente junto con el pedido.
 - El CRUD de productos crea, edita y elimina registros correctamente.
 - Los registros temporales de las pruebas se eliminaron; los datos previos se conservaron.
 

@@ -86,7 +86,12 @@
                 <span class="product-price">${{ product.price }} USD</span>
                 <span class="product-price-clp">≈ ${{ product.price|floatformat:0 }} CLP</span>
               </div>
-              <button type="button">Añadir al Carrito</button>
+              <form method="post" action="{% url 'cart_add' product.id %}">
+                {% csrf_token %}
+                <button type="submit" {% if product.stock == 0 %}disabled aria-disabled="true"{% endif %}>
+                  {% if product.stock == 0 %}Agotado{% else %}Añadir al Carrito{% endif %}
+                </button>
+              </form>
             </div>
           </article>
         {% endfor %}
@@ -145,6 +150,9 @@
         </form>
       </div>
     </div>
+    <p style="text-align:center; margin:1.5rem 0 0;">
+      <a class="btn-account" href="{% url 'admin:login' %}" style="display:inline-block; text-decoration:none;">Ingresar como administrador</a>
+    </p>
   </section>
 
   <section class="contact-section" id="contacto">

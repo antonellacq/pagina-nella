@@ -1,20 +1,22 @@
 from decimal import Decimal
 from decimal import InvalidOperation
+from functools import wraps
 from uuid import uuid4
 
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.models import User
 from django.contrib.auth.password_validation import validate_password
-from django.core.exceptions import ValidationError
+from django.core.exceptions import PermissionDenied, ValidationError
 from django.core.validators import validate_email
 from django.db import transaction
 from django.db.models import Q
+from django.urls import reverse
+from django.contrib.auth.views import redirect_to_login
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_http_methods
 
-from .models import Cliente, ContactMessage, Order, Product
+from .models import Cliente, ContactMessage, Order, OrderItem, Product
 
 DEFAULT_PRODUCTS = [
     {
@@ -72,6 +74,22 @@ DEFAULT_PRODUCTS = [
         'rating': '4.5',
     },
 ]
+
+
+def requiere_permiso_producto(obtener_permiso):
+    def decorar(vista):
+        @wraps(vista)
+        def protegida(request, *args, **kwargs):
+            if not request.user.is_authenticated:
+                return redirect_to_login(request.get_full_path(), login_url=reverse('admin:login'))
+            permiso = obtener_permiso(request, *args, **kwargs) if callable(obtener_permiso) else obtener_permiso
+            if not request.user.is_superuser and not request.user.has_perm(permiso):
+                raise PermissionDenied
+            return vista(request, *args, **kwargs)
+
+        return protegida
+
+    return decorar
 
 
 def seed_products():
@@ -213,15 +231,100 @@ def contact_submit(request):
     return redirect('home')
 
 
-@user_passes_test(lambda user: user.is_staff)
+def cart_view(request):
+    carrito = request.session.get('carrito', {})
+    productos = Product.objects.filter(pk__in=carrito.keys(), is_active=True)
+    productos_por_id = {str(producto.pk): producto for producto in productos}
+    lineas = []
+    subtotal = Decimal('0.00')
+    cantidad_total = 0
+
+    for identificador, datos in list(carrito.items()):
+        producto = productos_por_id.get(str(identificador))
+        if producto is None:
+            carrito.pop(identificador, None)
+            continue
+        try:
+            cantidad = int(datos.get('cantidad', 0))
+        except (AttributeError, TypeError, ValueError):
+            carrito.pop(identificador, None)
+            continue
+        if cantidad < 1:
+            carrito.pop(identificador, None)
+            continue
+        total_linea = producto.price * cantidad
+        subtotal += total_linea
+        cantidad_total += cantidad
+        lineas.append({'producto': producto, 'cantidad': cantidad, 'total': total_linea})
+
+    request.session['carrito'] = carrito
+    return render(request, 'shop/cart.html', {
+        'lineas_carrito': lineas,
+        'subtotal_carrito': subtotal,
+        'cantidad_carrito': cantidad_total,
+        'metodos_pago': Order.PAYMENT_METHODS,
+    })
+
+
+@require_http_methods(['POST'])
+def cart_add(request, product_id):
+    producto = get_object_or_404(Product, pk=product_id, is_active=True)
+    carrito = request.session.get('carrito', {})
+    identificador = str(producto.pk)
+    cantidad_actual = int(carrito.get(identificador, {}).get('cantidad', 0))
+
+    if producto.stock <= cantidad_actual:
+        messages.error(request, f'No hay unidades disponibles de {producto.name}.')
+    else:
+        carrito[identificador] = {'cantidad': cantidad_actual + 1}
+        request.session['carrito'] = carrito
+        messages.success(request, f'{producto.name} se agregó al carrito.')
+    return redirect('home')
+
+
+@require_http_methods(['POST'])
+def cart_update(request, product_id):
+    producto = get_object_or_404(Product, pk=product_id, is_active=True)
+    carrito = request.session.get('carrito', {})
+    identificador = str(producto.pk)
+    try:
+        cantidad = int(request.POST.get('cantidad', '0'))
+    except ValueError:
+        messages.error(request, 'La cantidad ingresada no es válida.')
+        return redirect('cart')
+
+    if cantidad <= 0:
+        carrito.pop(identificador, None)
+        messages.success(request, f'{producto.name} se eliminó del carrito.')
+    elif cantidad > producto.stock:
+        messages.error(request, f'El stock disponible de {producto.name} es {producto.stock}.')
+    else:
+        carrito[identificador] = {'cantidad': cantidad}
+        messages.success(request, 'Se actualizó la cantidad del carrito.')
+    request.session['carrito'] = carrito
+    return redirect('cart')
+
+
+@require_http_methods(['POST'])
+def cart_remove(request, product_id):
+    carrito = request.session.get('carrito', {})
+    carrito.pop(str(product_id), None)
+    request.session['carrito'] = carrito
+    messages.success(request, 'Se quitó el producto del carrito.')
+    return redirect('cart')
+
+
+@requiere_permiso_producto('shop.view_product')
 def inventory(request):
     products = seed_products().order_by('-rating', '-created_at')
     context = {'products': products}
     return render(request, 'shop/inventory.html', context)
 
 
-@user_passes_test(lambda user: user.is_staff)
 @require_http_methods(['GET', 'POST'])
+@requiere_permiso_producto(
+    lambda request, *args, **kwargs: 'shop.add_product' if kwargs.get('product_id') is None else 'shop.change_product'
+)
 def product_form(request, product_id=None):
     product = get_object_or_404(Product, pk=product_id) if product_id else None
 
@@ -284,8 +387,8 @@ def product_form(request, product_id=None):
     return render(request, 'shop/inventory_form.html', context)
 
 
-@user_passes_test(lambda user: user.is_staff)
 @require_http_methods(['POST'])
+@requiere_permiso_producto('shop.delete_product')
 def product_delete(request, product_id):
     product = get_object_or_404(Product, pk=product_id)
     product_name = product.name
@@ -304,29 +407,31 @@ def checkout_view(request):
     zip_code = (request.POST.get('zip_code') or '').strip()
     country = (request.POST.get('country') or '').strip()
     payment_method = request.POST.get('payment_method') or 'credit'
-    total = request.POST.get('total') or '0'
+    carrito = request.session.get('carrito', {})
 
     if not all([name, email, phone, street, city, zip_code, country]):
         messages.error(request, 'Completa todos los datos de pago y envío.')
-        return redirect('home')
-
-    try:
-        order_total = Decimal(total)
-    except InvalidOperation:
-        messages.error(request, 'El total del pedido no es válido.')
-        return redirect('home')
-
-    if not order_total.is_finite() or order_total <= 0:
-        messages.error(request, 'El total del pedido debe ser mayor a cero.')
-        return redirect('home')
+        return redirect('cart')
+    if not carrito:
+        messages.error(request, 'Agrega productos al carrito antes de confirmar el pedido.')
+        return redirect('cart')
     if payment_method not in dict(Order.PAYMENT_METHODS):
         messages.error(request, 'Selecciona un medio de pago válido.')
-        return redirect('home')
+        return redirect('cart')
     try:
         validate_email(email)
     except ValidationError:
         messages.error(request, 'Ingresa un correo electrónico válido.')
-        return redirect('home')
+        return redirect('cart')
+
+    try:
+        cantidades = {int(identificador): int(datos['cantidad']) for identificador, datos in carrito.items()}
+    except (KeyError, TypeError, ValueError):
+        messages.error(request, 'El carrito contiene productos inválidos. Revísalo e inténtalo nuevamente.')
+        return redirect('cart')
+    if any(cantidad < 1 for cantidad in cantidades.values()):
+        messages.error(request, 'Las cantidades del carrito deben ser mayores a cero.')
+        return redirect('cart')
 
     partes_nombre = name.split(maxsplit=1)
     nombre = partes_nombre[0][:100]
@@ -338,6 +443,20 @@ def checkout_view(request):
         cliente = Cliente.objects.filter(correo__iexact=email, usuario__isnull=True).first()
 
     with transaction.atomic():
+        productos = list(
+            Product.objects.select_for_update().filter(pk__in=cantidades, is_active=True).order_by('pk')
+        )
+        if len(productos) != len(cantidades):
+            messages.error(request, 'Uno de los productos ya no está disponible.')
+            return redirect('cart')
+        if any(producto.stock < cantidades[producto.pk] for producto in productos):
+            messages.error(request, 'El stock cambió. Ajusta las cantidades antes de confirmar.')
+            return redirect('cart')
+        order_total = sum(
+            (producto.price * cantidades[producto.pk] for producto in productos),
+            Decimal('0.00'),
+        )
+
         if cliente is None:
             cliente = Cliente.objects.create(
                 usuario=request.user if request.user.is_authenticated else None,
@@ -356,7 +475,7 @@ def checkout_view(request):
             cliente.save()
 
         order_number = f'BG-{request.user.id if request.user.is_authenticated else "GUEST"}-{uuid4().hex[:12].upper()}'
-        Order.objects.create(
+        pedido = Order.objects.create(
             cliente=cliente,
             user=request.user if request.user.is_authenticated else None,
             order_number=order_number,
@@ -370,6 +489,17 @@ def checkout_view(request):
             payment_method=payment_method,
             total=order_total,
         )
+        for producto in productos:
+            cantidad = cantidades[producto.pk]
+            OrderItem.objects.create(
+                order=pedido,
+                product=producto,
+                quantity=cantidad,
+                unit_price=producto.price,
+            )
+            producto.stock -= cantidad
+            producto.save(update_fields=['stock', 'updated_at'])
 
+    request.session['carrito'] = {}
     messages.success(request, f'Pedido registrado con éxito. Orden {order_number}.')
     return redirect('home')

@@ -29,7 +29,7 @@
           {% else %}
             <a class="btn-account" href="{% url 'home' %}#auth" style="text-decoration: none;">Cuenta</a>
           {% endif %}
-          <div class="cart-icon" aria-label="Carrito de compras">🛒</div>
+          <a class="cart-icon" href="{% url 'cart' %}" aria-label="Ver carrito">🛒{% if carrito_cantidad %} <span class="cart-count">{{ carrito_cantidad }}</span>{% endif %}</a>
         </div>
       </nav>
     </header>
