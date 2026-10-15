@@ -1,0 +1,186 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Blush & Glow | Maquillaje Premium{% endblock %}
+
+{% block content %}
+  <section class="hero" id="inicio">
+    <h1>Realza tu Belleza Natural</h1>
+    <p>Maquillaje premium importado de las mejores marcas del mercado. Calidad, estilo y elegancia para ti.</p>
+    <a class="btn" href="#productos" style="text-decoration: none;">Comprar Ahora</a>
+  </section>
+
+  <section class="gallery" id="galeria" style="padding: 4rem 4% 2rem;">
+    <div class="gallery-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem;">
+      <div class="gallery-card" style="background: white; border-radius: 1.2rem; padding: 1rem; box-shadow: 0 10px 30px rgba(184, 92, 119, 0.08); text-align: center;">
+        <img src="{% static 'img/luxurious_lipsticks_1778612236329.png' %}" alt="Lipsticks" style="width: 100%; max-height: 220px; object-fit: cover; border-radius: 1rem;" />
+      </div>
+      <div class="gallery-card" style="background: white; border-radius: 1.2rem; padding: 1rem; box-shadow: 0 10px 30px rgba(184, 92, 119, 0.08); text-align: center;">
+        <img src="{% static 'img/premium_makeup_palette_1778612222439.png' %}" alt="Palette" style="width: 100%; max-height: 220px; object-fit: cover; border-radius: 1rem;" />
+      </div>
+      <div class="gallery-card" style="background: white; border-radius: 1.2rem; padding: 1rem; box-shadow: 0 10px 30px rgba(184, 92, 119, 0.08); text-align: center;">
+        <img src="{% static 'img/glowing_foundation_1778612251107.png' %}" alt="Foundation" style="width: 100%; max-height: 220px; object-fit: cover; border-radius: 1rem;" />
+      </div>
+    </div>
+  </section>
+
+  <section class="products" id="productos">
+    <h2>Nuestros Productos Premium</h2>
+    <p class="products-subtitle">
+      Catálogo curado en base al negocio de cosmética con productos de alta gama, filtros por marca y categoría y control de inventario desde Django.
+    </p>
+
+    <form method="get" action="{% url 'home' %}" class="filters-bar" style="display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; justify-content: center; margin-bottom: 1.5rem;">
+      <div class="search-wrapper">
+        <input type="text" class="search-input" name="q" value="{{ search_query }}" placeholder="Buscar maquillaje..." />
+      </div>
+
+      <div class="filter-selects" style="display: flex; gap: 1rem; flex-wrap: wrap;">
+        <div class="select-wrapper">
+          <select class="select-filter" name="brand">
+            <option value="all">Todas las marcas</option>
+            {% for brand in brands %}
+              <option value="{{ brand }}" {% if brand == selected_brand %}selected{% endif %}>{{ brand }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="select-wrapper">
+          <select class="select-filter" name="sort">
+            <option value="relevance" {% if sort_by == 'relevance' %}selected{% endif %}>Relevancia</option>
+            <option value="price_asc" {% if sort_by == 'price_asc' %}selected{% endif %}>Precio: menor a mayor</option>
+            <option value="price_desc" {% if sort_by == 'price_desc' %}selected{% endif %}>Precio: mayor a menor</option>
+            <option value="name_asc" {% if sort_by == 'name_asc' %}selected{% endif %}>Nombre: A-Z</option>
+          </select>
+        </div>
+      </div>
+
+      <button type="submit" class="btn" style="padding: 0.7rem 1.5rem;">Filtrar</button>
+    </form>
+
+    <div class="category-pills">
+      <a href="{% url 'home' %}?category=all&brand={{ selected_brand }}&sort={{ sort_by }}&q={{ search_query }}" class="category-pill {% if selected_category == 'all' %}active{% endif %}">Todos</a>
+      {% for value, label in available_categories %}
+        <a href="{% url 'home' %}?category={{ value }}&brand={{ selected_brand }}&sort={{ sort_by }}&q={{ search_query }}" class="category-pill {% if selected_category == value %}active{% endif %}">{{ label }}</a>
+      {% endfor %}
+    </div>
+
+    {% if products %}
+      <div class="products-grid">
+        {% for product in products %}
+          <article class="product-card">
+            <span class="product-brand-tag">{{ product.brand }}</span>
+            <span class="product-rating">★ {{ product.rating }}</span>
+            <div class="product-image-container">
+              {% if product.image_url %}
+                <img class="product-img-el" src="{{ product.image_url }}" alt="{{ product.name }}" />
+              {% else %}
+                <span class="product-image-fallback">✨</span>
+              {% endif %}
+            </div>
+            <div class="product-info">
+              <span class="product-category-title">{{ product.get_category_display }}</span>
+              <h3 class="product-name">{{ product.name }}</h3>
+              <p class="product-desc">{{ product.description }}</p>
+              <div class="product-price-row">
+                <span class="product-price">${{ product.price }} USD</span>
+                <span class="product-price-clp">≈ ${{ product.price|floatformat:0 }} CLP</span>
+              </div>
+              <button type="button">Añadir al Carrito</button>
+            </div>
+          </article>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div style="text-align:center; padding:2rem; color:#6e6e6e;">
+        <p>No encontramos productos con los filtros aplicados.</p>
+      </div>
+    {% endif %}
+  </section>
+
+  <section class="auth-panel" id="auth" style="padding: 4rem 4% 2rem;">
+    <div class="auth-menu" style="display:flex; gap:1rem; justify-content:center; flex-wrap:wrap; margin-bottom:2rem;">
+      <span class="auth-tab active">Registro</span>
+      <span class="auth-tab">Inicio de sesión</span>
+    </div>
+
+    <div class="auth-grid" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:1.5rem;">
+      <div class="auth-form active" style="background:white; border-radius:16px; padding:2rem; box-shadow:0 10px 30px rgba(184,92,119,0.08);">
+        <h3>Registro</h3>
+        <form method="post" action="{% url 'register' %}">
+          {% csrf_token %}
+          <div class="form-field">
+            <label for="registerUsername">Usuario</label>
+            <input type="text" id="registerUsername" name="username" placeholder="Nombre de usuario" required />
+          </div>
+          <div class="form-field">
+            <label for="registerEmail">Email</label>
+            <input type="email" id="registerEmail" name="email" placeholder="usuario@ejemplo.com" required />
+          </div>
+          <div class="form-field">
+            <label for="registerPassword">Contraseña</label>
+            <input type="password" id="registerPassword" name="password" placeholder="Mínimo 8 caracteres" required />
+          </div>
+          <div class="form-field">
+            <label for="registerConfirmPassword">Confirmar Contraseña</label>
+            <input type="password" id="registerConfirmPassword" name="confirm_password" placeholder="Repite la contraseña" required />
+          </div>
+          <button type="submit" class="btn">Registrarse</button>
+        </form>
+      </div>
+
+      <div class="auth-form active" style="background:white; border-radius:16px; padding:2rem; box-shadow:0 10px 30px rgba(184,92,119,0.08);">
+        <h3>Iniciar sesión</h3>
+        <form method="post" action="{% url 'login' %}">
+          {% csrf_token %}
+          <div class="form-field">
+            <label for="loginUsername">Usuario</label>
+            <input type="text" id="loginUsername" name="username" placeholder="Usuario" required />
+          </div>
+          <div class="form-field">
+            <label for="loginPassword">Contraseña</label>
+            <input type="password" id="loginPassword" name="password" placeholder="Contraseña" required />
+          </div>
+          <button type="submit" class="btn">Entrar</button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <section class="contact-section" id="contacto">
+    <h2>Contáctanos</h2>
+    <div class="contact-content">
+      <div class="contact-info">
+        <h3>Información de Contacto</h3>
+        <p><strong>Email de Soporte</strong><span>info@brushglow.com</span></p>
+        <p><strong>Teléfono</strong><span>+56 9 1234 5678</span></p>
+        <p><strong>Horario de Atención</strong><span>Lunes a Viernes 9:00 - 18:00</span></p>
+        <div class="social-links">
+          <p>Síguenos en Redes Sociales</p>
+          <a href="#instagram">Instagram</a> | <a href="#facebook">Facebook</a>
+        </div>
+      </div>
+
+      <form class="contact-form" method="post" action="{% url 'contact_submit' %}">
+        {% csrf_token %}
+        <div class="form-field">
+          <label for="name">Nombre</label>
+          <input type="text" id="name" name="name" required />
+        </div>
+        <div class="form-field">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" required />
+        </div>
+        <div class="form-field">
+          <label for="phone">Teléfono</label>
+          <input type="text" id="phone" name="phone" />
+        </div>
+        <div class="form-field">
+          <label for="message">Mensaje</label>
+          <textarea id="message" name="message" rows="4" required></textarea>
+        </div>
+        <button type="submit" class="btn">Enviar Mensaje</button>
+      </form>
+    </div>
+  </section>
+{% endblock %}

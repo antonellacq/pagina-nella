@@ -1,0 +1,61 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}Blush & Glow{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/estilo1.css' %}" />
+  </head>
+  <body>
+    <header>
+      <nav>
+        <div class="logo" onclick="location.href='{% url 'home' %}'" style="cursor: pointer;">💄 Blush &amp; Glow</div>
+        <ul class="nav-links">
+          <li><a href="{% url 'home' %}#inicio">Inicio</a></li>
+          <li><a href="{% url 'home' %}#galeria">Galería</a></li>
+          <li><a href="{% url 'home' %}#productos">Productos</a></li>
+          <li><a href="{% url 'home' %}#contacto">Contacto</a></li>
+          {% if user.is_staff %}
+            <li><a href="{% url 'inventory' %}">Inventario</a></li>
+          {% endif %}
+        </ul>
+        <div class="nav-actions">
+          {% if user.is_authenticated %}
+            <div class="user-logged">
+              <span>Hola, {{ user.username }}</span>
+              <a class="btn-account" href="{% url 'logout' %}" style="text-decoration: none;">Salir</a>
+            </div>
+          {% else %}
+            <a class="btn-account" href="{% url 'home' %}#auth" style="text-decoration: none;">Cuenta</a>
+          {% endif %}
+          <div class="cart-icon" aria-label="Carrito de compras">🛒</div>
+        </div>
+      </nav>
+    </header>
+
+    <main>
+      {% if messages %}
+        <div class="messages" style="max-width: 1200px; margin: 1rem auto 0; padding: 0 4%;">
+          {% for message in messages %}
+            <div class="message {{ message.tags }}" style="padding: 0.9rem 1rem; border-radius: 12px; margin-bottom: 0.75rem; background: #f4f8ef; color: #1a1a1a; border: 1px solid #dceecf;">
+              {{ message }}
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+
+      {% block content %}{% endblock %}
+    </main>
+
+    <footer>
+      <p>&copy; 2026 Blush &amp; Glow. Todos los derechos reservados.</p>
+      <p>Desarrollado con Django y MySQL para manejo seguro de datos.</p>
+      <div style="margin-top: 1.5rem; font-size: 0.95rem; opacity: 0.95; line-height: 1.8; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1.5rem;">
+        <p><strong>Profesor:</strong> Víctor Vásquez</p>
+        <p><strong>Alumna:</strong> Antonella catalán</p>
+        <p><strong>Sección:</strong> 2026/O TI3031/D-FB50-N3-P13-C1/D La Granja FB5</p>
+      </div>
+    </footer>
+  </body>
+</html>

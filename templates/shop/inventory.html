@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% block title %}Inventario | Blush & Glow{% endblock %}
+
+{% block content %}
+  <section class="inventory-panel" style="padding: 3rem 4%;">
+    <h2>Panel de Control de Inventario</h2>
+    <p class="products-subtitle" style="text-align: center; margin-bottom: 2rem;">
+      Administración de productos de Blush & Glow. Crea, actualiza y elimina registros almacenados en la base de datos.
+    </p>
+
+    <div class="inventory-controls" style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:1rem; margin-bottom:1.5rem;">
+      <div class="inventory-actions">
+        <a class="btn-add" href="{% url 'product_create' %}" style="text-decoration:none; display:inline-block;">➕ Añadir Producto</a>
+      </div>
+    </div>
+
+    <div class="table-responsive">
+      <table class="inventory-table">
+        <thead>
+          <tr>
+            <th>Imagen</th>
+            <th>Nombre</th>
+            <th>Marca</th>
+            <th>Categoría</th>
+            <th>Precio</th>
+            <th>Rating</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for product in products %}
+            <tr>
+              <td>
+                {% if product.image_url %}
+                  <img src="{{ product.image_url }}" alt="{{ product.name }}" class="table-img" style="max-width: 60px; border-radius: 12px;" />
+                {% else %}
+                  <span class="table-emoji">✨</span>
+                {% endif %}
+              </td>
+              <td style="font-weight: 600;">{{ product.name }}</td>
+              <td>{{ product.brand }}</td>
+              <td>{{ product.get_category_display }}</td>
+              <td>${{ product.price }} USD</td>
+              <td>★ {{ product.rating }}</td>
+              <td>
+                <a class="btn-edit-action" href="{% url 'product_edit' product.id %}" style="text-decoration:none; margin-right: 0.5rem;">✏️ Editar</a>
+                <form method="post" action="{% url 'product_delete' product.id %}" style="display:inline;">
+                  {% csrf_token %}
+                  <button class="btn-delete-action" type="submit">🗑️ Borrar</button>
+                </form>
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="7" style="text-align:center; padding:2rem;">No hay productos registrados.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+{% endblock %}
